@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-900 text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MISTERI SISTEM PENCERNAAN — Escape Room IPAS SD</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              400: '#2dd4bf',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              900: '#134e4a',
+            },
+            accent: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-gentle': 'bounceGentle 2s infinite',
+            'float': 'float 4s ease-in-out infinite',
+          },
+          keyframes: {
+            bounceGentle: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-6px)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Styles for Glassmorphism & Custom Scrollbars -->
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .glass-card-light {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #0d9488;
+      border-radius: 8px;
+    }
+    .glow-btn {
+      box-shadow: 0 0 15px rgba(20, 184, 166, 0.4);
+      transition: all 0.3s ease;
+    }
+    .glow-btn:hover {
+      box-shadow: 0 0 25px rgba(20, 184, 166, 0.7);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+
+<body class="h-full flex flex-col bg-slate-950 text-slate-100 overflow-x-hidden custom-scrollbar">
+
+  <!-- Top Controller & Navigation Bar -->
+  <header class="w-full bg-slate-900/90 backdrop-blur border-b border-slate-800 px-4 py-3 sticky top-0 z-40 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400 font-bold text-xl">
+        <i class="fa-solid fa-flask-vial"></i>
+      </div>
+      <div>
+        <h1 class="text-sm md:text-base font-bold text-white leading-tight">MISTERI SISTEM PENCERNAAN</h1>
+        <p class="text-xs text-teal-400 font-medium">Escape Room IPAS SD</p>
+      </div>
+    </div>
+
+    <!-- Active Game Header Info (Score & Timer) -->
+    <div id="headerGameStats" class="hidden flex items-center space-x-4 text-xs md:text-sm font-semibold">
+      <div class="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-amber-400 flex items-center space-x-1.5">
+        <i class="fa-solid fa-star"></i>
+        <span id="statScoreHeader">0</span> Pts
+      </div>
+      <div class="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-cyan-400 flex items-center space-x-1.5">
+        <i class="fa-solid fa-stopwatch"></i>
+        <span id="statTimerHeader">00:00</span>
+      </div>
+    </div>
+
+    <!-- Sound & Home Controls -->
+    <div class="flex items-center space-x-2">
+      <button id="btnAudioToggle" onclick="toggleAudio()" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-300 transition" title="Suara">
+        <i id="audioIcon" class="fa-solid fa-volume-high text-teal-400"></i>
+      </button>
+      <button id="btnHome" onclick="confirmReturnHome()" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-300 transition" title="Beranda">
+        <i class="fa-solid fa-house"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Notification Toast Container -->
+  <div id="toastContainer" class="fixed top-16 right-4 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- Modal Dialog System -->
+  <div id="customModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl transform transition-all scale-95 opacity-0" id="modalContent">
+      <div class="text-center">
+        <div id="modalIcon" class="w-14 h-14 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center mx-auto mb-4 text-2xl">
+          <i class="fa-solid fa-circle-info"></i>
+        </div>
+        <h3 id="modalTitle" class="text-xl font-bold text-white mb-2">Judul Modal</h3>
+        <p id="modalBody" class="text-slate-300 text-sm mb-6 leading-relaxed">Pesan modal akan ditampilkan di sini.</p>
+        <div id="modalActions" class="flex justify-center space-x-3">
+          <button id="btnModalConfirm" class="px-5 py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-semibold rounded-xl text-sm transition">
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN VIEWPORT CONTAINER -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 flex flex-col justify-center items-center">
+
+    <!-- VIEW 1: LOADING SCREEN -->
+    <section id="viewLoading" class="w-full max-w-2xl text-center py-12 flex flex-col items-center">
+      <div class="relative mb-8">
+        <div class="w-28 h-28 rounded-3xl bg-gradient-to-tr from-teal-500 to-cyan-500 p-1 animate-pulse-slow shadow-2xl">
+          <div class="w-full h-full bg-slate-950 rounded-[22px] flex items-center justify-center text-teal-400 text-5xl">
+            <i class="fa-solid fa-magnifying-glass-location animate-float"></i>
+          </div>
+        </div>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">MISTERI SISTEM PENCERNAAN</h1>
+      <p class="text-teal-400 text-sm md:text-base font-semibold tracking-wider uppercase mb-8">Escape Room IPAS — Kelas 5 SD</p>
+
+      <div class="w-full max-w-md bg-slate-800 rounded-full h-3 mb-4 overflow-hidden p-0.5 border border-slate-700">
+        <div id="loadingProgressBar" class="bg-gradient-to-r from-teal-500 to-cyan-400 h-full rounded-full w-0 transition-all duration-500"></div>
+      </div>
+      <p id="loadingStatusText" class="text-xs md:text-sm text-slate-400 italic">Menyiapkan laboratorium...</p>
+    </section>
+
+    <!-- VIEW 2: BERANDA -->
+    <section id="viewHome" class="w-full max-w-4xl text-center hidden py-6">
+      <div class="glass-card rounded-3xl p-8 md:p-12 border border-slate-800 shadow-2xl relative overflow-hidden">
+        <div class="absolute -top-24 -left-24 w-60 h-60 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -right-24 w-60 h-60 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="inline-flex items-center space-x-2 bg-teal-500/10 border border-teal-500/30 px-4 py-1.5 rounded-full text-teal-300 text-xs font-semibold mb-6">
+          <i class="fa-solid fa-user-ninja"></i>
+          <span>Misi Detektif Cilik SD Kelas 5</span>
+        </div>
+
+        <h1 class="text-3xl md:text-5xl font-black text-white leading-tight mb-4 tracking-tight">
+          MISTERI SISTEM PENCERNAAN
+        </h1>
+        <p class="text-lg md:text-xl text-teal-300 font-bold mb-6">ESCAPE ROOM IPAS</p>
+
+        <p class="text-slate-300 text-sm md:text-base max-w-2xl mx-auto mb-10 leading-relaxed">
+          "Selamat datang di Laboratorium Pencernaan! Hari ini sistem laboratorium terkunci dan data organ terorganisasi secara rahasia. Jadilah <span class="text-teal-400 font-semibold">Detektif Sistem Pencernaan</span>, temukan kode rahasia, dan selamatkan sistem keamanan laboratorium!"
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto">
+          <button onclick="switchView('viewRegister')" class="glow-btn col-span-1 sm:col-span-2 py-4 px-6 bg-gradient-to-r from-teal-500 to-cyan-500 text-slate-950 font-extrabold text-lg rounded-2xl flex items-center justify-center space-x-3 transition">
+            <i class="fa-solid fa-play"></i>
+            <span>MULAI PERMAINAN</span>
+          </button>
+
+          <button onclick="switchView('viewInstructions')" class="py-3 px-5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold rounded-xl flex items-center justify-center space-x-2 transition text-sm">
+            <i class="fa-solid fa-book-open text-amber-400"></i>
+            <span>PETUNJUK</span>
+          </button>
+
+          <button onclick="switchView('viewLeaderboard')" class="py-3 px-5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold rounded-xl flex items-center justify-center space-x-2 transition text-sm">
+            <i class="fa-solid fa-trophy text-yellow-400"></i>
+            <span>PAPAN SKOR</span>
+          </button>
+
+          <button onclick="switchView('viewAbout')" class="col-span-1 sm:col-span-2 py-3 px-5 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 text-slate-400 font-medium rounded-xl flex items-center justify-center space-x-2 transition text-xs">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>TENTANG GIM</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: PETUNJUK PERMAINAN -->
+    <section id="viewInstructions" class="w-full max-w-3xl hidden py-6">
+      <div class="glass-card rounded-3xl p-6 md:p-8 border border-slate-800">
+        <div class="flex items-center space-x-3 mb-6 border-b border-slate-800 pb-4">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl">
+            <i class="fa-solid fa-book-bookmark"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-white">Petunjuk Permainan & Skor</h2>
+            <p class="text-xs text-slate-400">Panduan lengkap detektif dalam menyelesaikan escape room</p>
+          </div>
+        </div>
+
+        <div class="space-y-6 text-sm text-slate-300">
+          <div>
+            <h3 class="text-teal-400 font-bold mb-2 flex items-center text-base">
+              <i class="fa-solid fa-list-check mr-2"></i> Cara Bermain
+            </h3>
+            <ul class="list-disc list-inside space-y-1.5 pl-2 text-slate-300">
+              <li>Masukkan nama dan kelas di halaman Registrasi Pemain.</li>
+              <li>Selesaikan <span class="text-white font-semibold">5 Ruang Misteri</span> secara berurutan.</li>
+              <li>Baca pertanyaan dan skenario dengan teliti sebelum menjawab.</li>
+              <li>Kumpulkan angka kode rahasia dari Misi 1 sampai Misi 4.</li>
+              <li>Gunakan kode untuk membuka kunci laboratorium di Misi 5!</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="text-amber-400 font-bold mb-2 flex items-center text-base">
+              <i class="fa-solid fa-star mr-2"></i> Aturan Skor Detektif
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 flex justify-between items-center">
+                <span>Jawaban Benar</span>
+                <span class="text-teal-400 font-bold">+100 Poin</span>
+              </div>
+              <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 flex justify-between items-center">
+                <span>Menyelesaikan 1 Misi</span>
+                <span class="text-teal-400 font-bold">+200 Poin</span>
+              </div>
+              <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 flex justify-between items-center">
+                <span>Bonus Ketelitian Misi 4</span>
+                <span class="text-amber-400 font-bold">+100 Poin</span>
+              </div>
+              <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 flex justify-between items-center">
+                <span>Penyelesaian Escape Room</span>
+                <span class="text-cyan-400 font-bold">+300 Poin</span>
+              </div>
+              <div class="p-3 bg-slate-800/80 rounded-xl border border-slate-700 flex justify-between items-center col-span-1 sm:col-span-2">
+                <span>Menggunakan Bantuan Petunjuk (Hint)</span>
+                <span class="text-rose-400 font-bold">-25 Poin</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-end">
+          <button onclick="switchView('viewHome')" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-semibold rounded-xl text-sm transition flex items-center space-x-2">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Kembali ke Beranda</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: REGISTRASI PEMAIN -->
+    <section id="viewRegister" class="w-full max-w-md hidden py-6">
+      <div class="glass-card rounded-3xl p-6 md:p-8 border border-slate-800 shadow-2xl">
+        <div class="text-center mb-6">
+          <div class="w-16 h-16 rounded-2xl bg-teal-500/20 border border-teal-500/30 text-teal-400 flex items-center justify-center mx-auto mb-3 text-3xl">
+            <i class="fa-solid fa-id-card"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-white">Identitas Detektif</h2>
+          <p class="text-xs text-slate-400 mt-1">Isi data sebelum memasuki laboratorium</p>
+        </div>
+
+        <form onsubmit="handleRegistration(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Nama Lengkap Siswa</label>
+            <input type="text" id="inputPlayerName" placeholder="Contoh: Budi Santoso" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 transition text-sm">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Kelas SD</label>
+            <select id="selectPlayerClass" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-teal-500 transition text-sm">
+              <option value="">-- Pilih Kelas --</option>
+              <option value="V-A">V-A</option>
+              <option value="V-B">V-B</option>
+              <option value="V-C">V-C</option>
+              <option value="Lainnya">Lainnya (Kelas 5)</option>
+            </select>
+          </div>
+
+          <button type="submit" class="glow-btn w-full mt-6 py-3.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-slate-950 font-bold rounded-xl flex items-center justify-center space-x-2 transition">
+            <i class="fa-solid fa-lock-open"></i>
+            <span>MASUK KE LABORATORIUM</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- VIEW 5: PETA MISI (MISSION MAP) -->
+    <section id="viewMissionMap" class="w-full max-w-4xl hidden py-6">
+      <div class="glass-card rounded-3xl p-6 md:p-8 border border-slate-800">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-6 mb-6 gap-4">
+          <div>
+            <span class="text-xs font-bold text-teal-400 tracking-wider uppercase">Papan Peta Misi</span>
+            <h2 class="text-2xl font-extrabold text-white">Laboratorium Pencernaan</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Detektif: <span id="displayPlayerInfo" class="text-white font-semibold">-</span></p>
+          </div>
+          <div class="flex items-center space-x-2 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700 text-xs">
+            <span class="text-slate-400">Status Misi:</span>
+            <span id="missionProgressBadge" class="text-amber-400 font-bold">1 / 5 Terbuka</span>
+          </div>
+        </div>
+
+        <!-- 5 Mission Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+
+          <!-- Mission 1 -->
+          <div id="cardMission1" onclick="startMission(1)" class="cursor-pointer bg-slate-800/80 hover:bg-slate-800 border-2 border-teal-500/60 rounded-2xl p-4 flex flex-col justify-between transition hover:-translate-y-1">
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-500/20 text-teal-400">MISI 1</span>
+                <i id="iconStatus1" class="fa-solid fa-unlock text-teal-400"></i>
+              </div>
+              <h3 class="text-sm font-bold text-white mb-1">Jalur Makanan</h3>
+              <p class="text-xs text-slate-400">Urutkan organ pencernaan dari mulut hingga anus.</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-700/60 flex justify-between items-center text-[11px]">
+              <span class="text-slate-400">Kode: <strong id="codeBadge1" class="text-slate-500">?</strong></span>
+              <span class="text-teal-400 font-bold">Masuk <i class="fa-solid fa-chevron-right text-[9px]"></i></span>
+            </div>
+          </div>
+
+          <!-- Mission 2 -->
+          <div id="cardMission2" onclick="startMission(2)" class="cursor-not-allowed bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between opacity-60 transition">
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400">MISI 2</span>
+                <i id="iconStatus2" class="fa-solid fa-lock text-slate-500"></i>
+              </div>
+              <h3 class="text-sm font-bold text-white mb-1">Lab Organ</h3>
+              <p class="text-xs text-slate-400">Kenali nama organ & fungsi pencernaan.</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-[11px]">
+              <span class="text-slate-400">Kode: <strong id="codeBadge2" class="text-slate-500">?</strong></span>
+              <span class="text-slate-500 font-medium">Terkunci</span>
+            </div>
+          </div>
+
+          <!-- Mission 3 -->
+          <div id="cardMission3" onclick="startMission(3)" class="cursor-not-allowed bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between opacity-60 transition">
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400">MISI 3</span>
+                <i id="iconStatus3" class="fa-solid fa-lock text-slate-500"></i>
+              </div>
+              <h3 class="text-sm font-bold text-white mb-1">Klinik Penyakit</h3>
+              <p class="text-xs text-slate-400">Analisis gejala gangguan pencernaan.</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-[11px]">
+              <span class="text-slate-400">Kode: <strong id="codeBadge3" class="text-slate-500">?</strong></span>
+              <span class="text-slate-500 font-medium">Terkunci</span>
+            </div>
+          </div>
+
+          <!-- Mission 4 -->
+          <div id="cardMission4" onclick="startMission(4)" class="cursor-not-allowed bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between opacity-60 transition">
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400">MISI 4</span>
+                <i id="iconStatus4" class="fa-solid fa-lock text-slate-500"></i>
+              </div>
+              <h3 class="text-sm font-bold text-white mb-1">Detektif Teliti</h3>
+              <p class="text-xs text-slate-400">Tantangan membaca teliti & deteksi kesalahan.</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-[11px]">
+              <span class="text-slate-400">Kode: <strong id="codeBadge4" class="text-slate-500">?</strong></span>
+              <span class="text-slate-500 font-medium">Terkunci</span>
+            </div>
+          </div>
+
+          <!-- Mission 5 -->
+          <div id="cardMission5" onclick="startMission(5)" class="cursor-not-allowed bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between opacity-60 transition">
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400">MISI 5</span>
+                <i id="iconStatus5" class="fa-solid fa-key text-slate-500"></i>
+              </div>
+              <h3 class="text-sm font-bold text-white mb-1">Kode Rahasia</h3>
+              <p class="text-xs text-slate-400">Masukkan kombinasi kode untuk keluar!</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-[11px]">
+              <span class="text-slate-400">Keypad</span>
+              <span class="text-slate-500 font-medium">Terkunci</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="mt-8 flex justify-between items-center border-t border-slate-800 pt-4">
+          <p class="text-xs text-slate-400">Kumpulkan 4 angka kode rahasia dari Misi 1 sampai Misi 4 untuk membuka Misi 5.</p>
+          <button onclick="confirmReturnHome()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Keluar Gim
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 6: RUANG PERMAINAN MISI (MISI 1 - 4) -->
+    <section id="viewMissionRoom" class="w-full max-w-4xl hidden py-4">
+      <div class="glass-card rounded-3xl p-5 md:p-8 border border-slate-800">
+        <!-- Room Top Bar -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-6 border-b border-slate-800 gap-3">
+          <div class="flex items-center space-x-3">
+            <div id="missionRoomBadge" class="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-400 font-bold flex items-center justify-center text-sm border border-teal-500/30">
+              M1
+            </div>
+            <div>
+              <h2 id="missionRoomTitle" class="text-lg md:text-xl font-bold text-white">Judul Ruang Misi</h2>
+              <p id="missionRoomSubtitle" class="text-xs text-slate-400">Soal 1 dari 5</p>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <button onclick="requestHint()" class="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
+              <i class="fa-solid fa-lightbulb"></i>
+              <span>Petunjuk (-25 pt)</span>
+            </button>
+            <button onclick="switchView('viewMissionMap')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition">
+              <i class="fa-solid fa-map mr-1"></i> Peta Misi
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Question Content Area -->
+        <div id="questionContentArea" class="mb-6"></div>
+
+        <!-- Answer Options / Drag Drop Container -->
+        <div id="answerOptionsArea" class="space-y-3 mb-6"></div>
+
+        <!-- Feedback Container -->
+        <div id="feedbackContainer" class="hidden p-4 rounded-2xl mb-6 border text-sm transition-all">
+          <div class="flex items-start space-x-3">
+            <div id="feedbackIcon" class="text-2xl mt-0.5"></div>
+            <div class="flex-1">
+              <h4 id="feedbackTitle" class="font-bold text-base mb-1">Feedback</h4>
+              <p id="feedbackText" class="text-slate-200 text-xs md:text-sm mb-2">Penjelasan jawaban.</p>
+              <div id="feedbackTip" class="bg-slate-900/60 p-2.5 rounded-xl text-xs text-slate-300 border border-slate-700/50">
+                <i class="fa-solid fa-circle-info text-cyan-400 mr-1"></i>
+                <span id="feedbackTipText">Tips Detektif</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="flex justify-end pt-4 border-t border-slate-800">
+          <button id="btnNextQuestion" onclick="handleNextQuestion()" class="hidden glow-btn px-6 py-2.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl text-sm transition flex items-center space-x-2">
+            <span>LANJUTKAN</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 7: RUANG MISI 5 (KEYPAD KODE RAHASIA) -->
+    <section id="viewMissionKeypad" class="w-full max-w-md hidden py-6">
+      <div class="glass-card rounded-3xl p-6 md:p-8 border border-slate-800 text-center">
+        <div class="w-16 h-16 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center mx-auto mb-4 text-3xl">
+          <i class="fa-solid fa-key"></i>
+        </div>
+        <h2 class="text-2xl font-black text-white mb-1">RUANG KODE RAHASIA</h2>
+        <p class="text-xs text-slate-400 mb-6">Masukkan 4 digit angka dari petunjuk Misi 1, 2, 3, dan 4!</p>
+
+        <!-- Display Code Banner -->
+        <div class="bg-slate-950 p-4 rounded-2xl border-2 border-slate-800 mb-6">
+          <div class="text-[10px] text-slate-400 font-mono uppercase tracking-widest mb-1">PIN SECURITY SYSTEM</div>
+          <div id="keypadDisplay" class="text-3xl font-mono font-black tracking-[0.5em] text-teal-400 h-10 flex items-center justify-center">
+            _ _ _ _
+          </div>
+        </div>
+
+        <!-- Collected Codes Summary -->
+        <div class="grid grid-cols-4 gap-2 mb-6 text-xs">
+          <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700">
+            <span class="block text-[10px] text-slate-400">Misi 1</span>
+            <strong id="summaryCode1" class="text-teal-400 text-sm">-</strong>
+          </div>
+          <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700">
+            <span class="block text-[10px] text-slate-400">Misi 2</span>
+            <strong id="summaryCode2" class="text-teal-400 text-sm">-</strong>
+          </div>
+          <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700">
+            <span class="block text-[10px] text-slate-400">Misi 3</span>
+            <strong id="summaryCode3" class="text-teal-400 text-sm">-</strong>
+          </div>
+          <div class="bg-slate-800/60 p-2 rounded-xl border border-slate-700">
+            <span class="block text-[10px] text-slate-400">Misi 4</span>
+            <strong id="summaryCode4" class="text-teal-400 text-sm">-</strong>
+          </div>
+        </div>
+
+        <!-- Digital Keypad Grid -->
+        <div class="grid grid-cols-3 gap-3 max-w-xs mx-auto mb-6">
+          <button onclick="pressKeypad('1')" class="py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xl rounded-xl border border-slate-700 transition">1</button>
+          <button onclick="pressKeypad('2')" class="py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xl rounded-xl border border-slate-700 transition">2</button>
+          <button onclick="pressKeypad('3')" class="py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xl rounded-xl border border-slate-700 transition">3</button>
+          <button onclick="pressKeypad('4')" class="py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xl rounded-xl border border-slate-700 transition">4</button>
+          <button onclick="pressKeypad('5')" class="py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xl rounded-xl border border-slate-700 transition">5</button>
+          <button onclick="pressKeypad('6')" class="py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xl rounded-xl border border-slate-700 transition">6</button>
+          <button onclick="pressKeypad('7')" class="py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xl rounded-xl border border-slate-700 transition">7</button>
+          <button onclick="pressKeypad('8')" class="py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xl rounded-xl border border-slate-700 transition">8</button>
+          <button onclick="pressKeypad('9')" class="py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xl rounded-xl border border-slate-700 transition">9</button>
+          <button onclick="clearKeypad()" class="py-3 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 font-bold text-sm rounded-xl border border-rose-500/30 transition">HAPUS</button>
+          <button onclick="pressKeypad('0')" class="py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xl rounded-xl border border-slate-700 transition">0</button>
+          <button onclick="submitKeypad()" class="py-3 bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-sm rounded-xl transition">BUKA</button>
+        </div>
+
+        <button onclick="switchView('viewMissionMap')" class="text-xs text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Peta Misi
+        </button>
+      </div>
+    </section>
+
+    <!-- VIEW 8: HASIL PERMAINAN -->
+    <section id="viewResults" class="w-full max-w-2xl hidden py-6">
+      <div class="glass-card rounded-3xl p-6 md:p-10 border border-slate-800 text-center relative overflow-hidden">
+        <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-400 to-yellow-500 p-1 mx-auto mb-4 shadow-2xl animate-bounce-gentle">
+          <div class="w-full h-full bg-slate-950 rounded-[22px] flex items-center justify-center text-amber-400 text-4xl">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+        </div>
+
+        <span id="resultPredicateBadge" class="inline-block px-4 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider mb-2">
+          🏆 DETEKTIF SUPER TELITI
+        </span>
+
+        <h2 class="text-3xl font-black text-white mb-1">MISI BEBAS & LAB TERBUKA!</h2>
+        <p class="text-xs md:text-sm text-slate-300 max-w-md mx-auto mb-6">
+          Selamat <span id="resultPlayerName" class="text-teal-400 font-bold">Siswa</span> (<span id="resultPlayerClass">V-A</span>)! Kamu berhasil memecahkan Misteri Sistem Pencernaan.
+        </p>
+
+        <!-- Stats Breakdown Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 text-left">
+          <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700">
+            <span class="block text-[11px] text-slate-400 mb-1">Total Skor</span>
+            <strong id="resultTotalScore" class="text-xl font-extrabold text-amber-400">1250</strong>
+          </div>
+          <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700">
+            <span class="block text-[11px] text-slate-400 mb-1">Tingkat Ketelitian</span>
+            <strong id="resultAccuracy" class="text-xl font-extrabold text-teal-400">95%</strong>
+          </div>
+          <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700">
+            <span class="block text-[11px] text-slate-400 mb-1">Benar / Salah</span>
+            <strong id="resultCorrectWrong" class="text-xl font-extrabold text-cyan-400">28/2</strong>
+          </div>
+          <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700">
+            <span class="block text-[11px] text-slate-400 mb-1">Waktu</span>
+            <strong id="resultTime" class="text-xl font-extrabold text-slate-200">08:45</strong>
+          </div>
+        </div>
+
+        <!-- Educational Closing Message -->
+        <div class="bg-teal-950/40 border border-teal-500/30 p-4 rounded-2xl mb-8 text-xs md:text-sm text-slate-300 leading-relaxed text-left">
+          <p class="font-bold text-teal-300 mb-1 flex items-center">
+            <i class="fa-solid fa-heart-pulse mr-1.5"></i> Pesan Kesehatan Pencernaan:
+          </p>
+          "Tetap rajin makan sayur dan buah, minum air putih cukup, cuci tangan sebelum makan, dan kunyah makanan hingga halus untuk menjaga organ pencernaanmu!"
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto">
+          <button onclick="switchView('viewReview')" class="py-3 px-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-list-check text-teal-400"></i>
+            <span>PEMBAHASAN SOAL</span>
+          </button>
+          <button onclick="switchView('viewLeaderboard')" class="py-3 px-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold rounded-xl text-xs transition flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-trophy text-amber-400"></i>
+            <span>PAPAN SKOR</span>
+          </button>
+          <button onclick="restartGame()" class="col-span-1 sm:col-span-2 glow-btn py-3.5 px-6 bg-gradient-to-r from-teal-500 to-cyan-500 text-slate-950 font-extrabold rounded-xl text-sm transition flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-rotate-right"></i>
+            <span>MAIN LAGI</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 9: PEMBAHASAN SOAL -->
+    <section id="viewReview" class="w-full max-w-4xl hidden py-6">
+      <div class="glass-card rounded-3xl p-6 md:p-8 border border-slate-800">
+        <div class="flex justify-between items-center pb-4 mb-6 border-b border-slate-800">
+          <div>
+            <h2 class="text-xl font-bold text-white">Pembahasan & Evaluation Review</h2>
+            <p class="text-xs text-slate-400">Pelajari seluruh soal dan jawaban yang telah kamu kerjakan</p>
+          </div>
+          <button onclick="switchView('viewResults')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Kembali
+          </button>
+        </div>
+
+        <div id="reviewQuestionsList" class="space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2"></div>
+      </div>
+    </section>
+
+    <!-- VIEW 10: PAPAN SKOR (LEADERBOARD) -->
+    <section id="viewLeaderboard" class="w-full max-w-3xl hidden py-6">
+      <div class="glass-card rounded-3xl p-6 md:p-8 border border-slate-800">
+        <div class="flex justify-between items-center pb-4 mb-6 border-b border-slate-800">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl">
+              <i class="fa-solid fa-ranking-star"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-white">Papan Skor Detektif</h2>
+              <p class="text-xs text-slate-400">Peringkat tertinggi siswa SD Kelas 5</p>
+            </div>
+          </div>
+          <button onclick="refreshLeaderboardUI()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-teal-400 rounded-lg text-xs font-semibold transition">
+            <i class="fa-solid fa-rotate"></i> Refresh
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs md:text-sm">
+            <thead>
+              <tr class="text-slate-400 border-b border-slate-800 uppercase text-[10px] tracking-wider">
+                <th class="pb-3 pl-2">Rank</th>
+                <th class="pb-3">Nama Siswa</th>
+                <th class="pb-3">Kelas</th>
+                <th class="pb-3">Skor</th>
+                <th class="pb-3">Ketelitian</th>
+                <th class="pb-3 pr-2">Waktu</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardTableBody" class="divide-y divide-slate-800/60 text-slate-200"></tbody>
+          </table>
+        </div>
+
+        <div class="mt-8 flex justify-end">
+          <button onclick="switchView('viewHome')" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold transition">
+            <i class="fa-solid fa-house mr-1"></i> Beranda
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 11: TENTANG GIM -->
+    <section id="viewAbout" class="w-full max-w-2xl hidden py-6">
+      <div class="glass-card rounded-3xl p-6 md:p-8 border border-slate-800 text-sm leading-relaxed">
+        <h2 class="text-2xl font-bold text-white mb-2">Tentang Gim Edukatif</h2>
+        <p class="text-xs text-teal-400 font-semibold mb-4">MISTERI SISTEM PENCERNAAN — ESCAPE ROOM IPAS</p>
+
+        <p class="text-slate-300 text-xs md:text-sm mb-4">
+          Gim ini dirancang khusus sesuai pembelajaran <strong class="text-white">IPAS Fase C Kelas 5 SD (Kurikulum Merdeka)</strong>. Gim menggabungkan strategi Escape Room interaktif untuk menguji pemahaman organ pencernaan, urutan makanan, fungsi organ, gejala penyakit pencernaan, serta kemampuan analisis dan ketelitian siswa.
+        </p>
+
+        <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 text-xs mb-6 space-y-2 text-slate-300">
+          <div><strong>Mata Pelajaran:</strong> Ilmu Pengetahuan Alam dan Sosial (IPAS)</div>
+          <div><strong>Sasaran Usia:</strong> 10 – 11 Tahun (Kelas V SD)</div>
+          <div><strong>Pengembangan UI/UX:</strong> Adaptive Responsive Educational Web App</div>
+          <div><strong>Penyimpanan Data:</strong> Standalone browser LocalStorage API</div>
+        </div>
+
+        <button onclick="switchView('viewHome')" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold transition">
+          <i class="fa-solid fa-arrow-left mr-1"></i> Kembali ke Beranda
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* ==========================================================================
+       AUDIO SYNTHESIZER (Web Audio API - Pure JS, No External Asset Dependencies)
+       ========================================================================== */
+    let audioCtx = null;
+    let isAudioMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          audioCtx = new AudioContext();
+        }
+      }
+    }
+
+    function toggleAudio() {
+      isAudioMuted = !isAudioMuted;
+      const icon = document.getElementById('audioIcon');
+      if (isAudioMuted) {
+        icon.className = 'fa-solid fa-volume-xmark text-slate-500';
+        showToast('Suara dimatikan', 'info');
+      } else {
+        icon.className = 'fa-solid fa-volume-high text-teal-400';
+        showToast('Suara diaktifkan', 'info');
+        playSynthSound('click');
+      }
+    }
+
+    function playSynthSound(type) {
+      if (isAudioMuted) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        } else if (type === 'correct') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+          osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.setValueAtTime(180, now + 0.12);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } else if (type === 'unlock') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'win') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.1);
+          osc.frequency.setValueAtTime(783.99, now + 0.2);
+          osc.frequency.setValueAtTime(1046.50, now + 0.3);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.6);
+          osc.start(now);
+          osc.stop(now + 0.6);
+        }
+      } catch (e) {
+        console.log("Audio playback note:", e);
+      }
+    }
+
+    /* ==========================================================================
+       GAME STATE MANAGEMENT
+       ========================================================================== */
+    let gameState = {
+      player: {
+        name: '',
+        class: '',
+      },
+      currentView: 'viewLoading',
+      score: 0,
+      timerSeconds: 0,
+      timerInterval: null,
+      unlockedMissions: [1], // Mission 1 initially unlocked
+      missionCodes: {
+        1: '3',
+        2: '7',
+        3: '2',
+        4: '5'
+      },
+      currentMission: 1,
+      currentQuestionIndex: 0,
+      activeMissionQuestions: [],
+      userAnswers: {},
+      missionProgress: {
+        1: false,
+        2: false,
+        3: false,
+        4: false,
+        5: false
+      },
+      keypadInput: '',
+      mission4ErrorsCount: 0
+    };
+
+    /* ==========================================================================
+       QUESTION BANK (Complete IPAS Grade 5 Questions)
+       ========================================================================== */
+    const QUESTION_BANK = {
+      // MISI 1: Jalur Makanan
+      mission1: [
+        {
+          id: 'M1_Q1',
+          mission: 1,
+          type: 'sequence',
+          question: 'Susun urutan organ pencernaan dari Makanan Masuk pertama kali hingga dikeluarkan!',
+          correctSequence: ['Mulut', 'Kerongkongan', 'Lambung', 'Usus Halus', 'Usus Besar', 'Anus'],
+          pool: ['Lambung', 'Mulut', 'Usus Besar', 'Kerongkongan', 'Anus', 'Usus Halus'],
+          explanation: 'Makanan masuk dari Mulut → Kerongkongan → Lambung → Usus Halus → Usus Besar → Anus.',
+          hint: 'Makanan pertama diunyah di mulut dan diakhiri pengeluaran sisa makanan lewat anus.',
+          score: 100
+        },
+        {
+          id: 'M1_Q2',
+          mission: 1,
+          type: 'mcq',
+          question: 'Setelah makanan dikunyah di mulut dan ditelan, organ manakah yang dilewati makanan sebelum sampai di lambung?',
+          options: ['Usus Halus', 'Kerongkongan', 'Usus Besar', 'Tenggorokan'],
+          answer: 1,
+          explanation: 'Kerongkongan (esofagus) menyalurkan makanan dari mulut menuju ke lambung dengan gerakan meremas (peristaltik).',
+          hint: 'Organ ini merupakan saluran panjang berbentuk tabung otot penghubung mulut dan lambung.',
+          score: 100
+        },
+        {
+          id: 'M1_Q3',
+          mission: 1,
+          type: 'mcq',
+          question: 'Sisa makanan dari usus halus yang airnya diserap akan masuk ke dalam organ...',
+          options: ['Lambung', 'Rektum', 'Usus Besar', 'Kerongkongan'],
+          answer: 2,
+          explanation: 'Dari usus halus, ampas sisa pencernaan bergerak masuk ke usus besar untuk diserap kandungan airnya.',
+          hint: 'Organ ini bertugas menyerap sisa air dan mineral dari ampas makanan.',
+          score: 100
+        },
+        {
+          id: 'M1_Q4',
+          mission: 1,
+          type: 'mcq',
+          question: 'Tempat penyimpanan sementara feses sebelum akhirnya dikeluarkan dari tubuh adalah...',
+          options: ['Usus Halus', 'Anus', 'Rektum', 'Lambung'],
+          answer: 2,
+          explanation: 'Rektum adalah bagian akhir dari usus besar yang berfungsi sebagai tempat penyimpanan sementara feses.',
+          hint: 'Organ ini berada persis di bagian akhir usus besar sebelum muara anus.',
+          score: 100
+        },
+        {
+          id: 'M1_Q5',
+          mission: 1,
+          type: 'sequence',
+          question: 'Susun 4 organ awal perjalanan bolus (gumpalan makanan)!',
+          correctSequence: ['Mulut', 'Kerongkongan', 'Lambung', 'Usus Halus'],
+          pool: ['Kerongkongan', 'Usus Halus', 'Mulut', 'Lambung'],
+          explanation: 'Empat organ awal perjalanan pencernaan adalah Mulut → Kerongkongan → Lambung → Usus Halus.',
+          hint: 'Dimulai dari pengunyahan mulut hingga penyerapan sari makanan di usus halus.',
+          score: 100
+        }
+      ],
+
+      // MISI 2: Laboratorium Organ
+      mission2: [
+        {
+          id: 'M2_Q1',
+          mission: 2,
+          type: 'mcq',
+          question: 'Organ apakah yang mengaduk makanan dan meremasnya dengan bantuan asam lambung serta enzim pencernaan?',
+          options: ['Mulut', 'Lambung', 'Usus Besar', 'Anus'],
+          answer: 1,
+          explanation: 'Lambung berfungsi mengaduk makanan secara mekanis dan memecah sel makanan secara kimiawi menggunakan asam lambung (HCl) dan enzim.',
+          hint: 'Organ ini kantung berotot berbentuk huruf J di dalam rongga perut.',
+          score: 100
+        },
+        {
+          id: 'M2_Q2',
+          mission: 2,
+          type: 'mcq',
+          question: 'Proses penyerapan sebagian besar sari-sari makanan ke dalam pembuluh darah terjadi pada organ...',
+          options: ['Kerongkongan', 'Lambung', 'Usus Halus', 'Rektum'],
+          answer: 2,
+          explanation: 'Usus halus memproses pencernaan kimiawi dan memiliki jonjot usus (vili) untuk menyerap sari makanan.',
+          hint: 'Organ ini merupakan saluran terpanjang dalam sistem pencernaan manusia.',
+          score: 100
+        },
+        {
+          id: 'M2_Q3',
+          mission: 2,
+          type: 'mcq',
+          question: 'Organ bantu pencernaan yang menghasilkan cairan empedu untuk membantu mencerna lemak adalah...',
+          options: ['Hati', 'Lambung', 'Gigi', 'Kelenjar Ludah'],
+          answer: 0,
+          explanation: 'Hati menghasilkan cairan empedu yang disimpan di kantung empedu untuk mencerna lemak.',
+          hint: 'Merupakan organ dalam terbesar yang berada di kanan atas rongga perut.',
+          score: 100
+        },
+        {
+          id: 'M2_Q4',
+          mission: 2,
+          type: 'mcq',
+          question: 'Di dalam mulut, enzim yang terkandung dalam air liur untuk memecah zat tepung (karbohidrat) menjadi gula adalah enzim...',
+          options: ['Pepsin', 'Amilase (Ptyalin)', 'Renin', 'Asam Klorida'],
+          answer: 1,
+          explanation: 'Enzim amilase (ptyalin) dihasilkan kelenjar ludah untuk mengubah zat tepung menjadi gula sederhana.',
+          hint: 'Enzim ini bekerja saat kita mengunyah nasi atau roti di dalam mulut.',
+          score: 100
+        },
+        {
+          id: 'M2_Q5',
+          mission: 2,
+          type: 'mcq',
+          question: 'Gerakan meremas dan mendorong makanan pada dinding kerongkongan disebut gerakan...',
+          options: ['Memutar', 'Peristaltik', 'Meluncur', 'Memompa'],
+          answer: 1,
+          explanation: 'Gerakan meremas otot dinding kerongkongan mendorong makanan masuk ke lambung disebut gerakan peristaltik.',
+          hint: 'Istilah gerakan otot bergelombang di saluran pencernaan.',
+          score: 100
+        },
+        {
+          id: 'M2_Q6',
+          mission: 2,
+          type: 'mcq',
+          question: 'Gigi yang berfungsi untuk memotong makanan saat kita menggigit buah atau roti adalah...',
+          options: ['Gigi Seri', 'Gigi Taring', 'Gigi Geraham', 'Gigi Bungsu'],
+          answer: 0,
+          explanation: 'Gigi seri berbentuk tajam pipih di depan berfungsi memotong makanan.',
+          hint: 'Gigi yang terletak paling depan di mulut.',
+          score: 100
+        },
+        {
+          id: 'M2_Q7',
+          mission: 2,
+          type: 'mcq',
+          question: 'Fungsi utama dari usus besar dalam pencernaan adalah...',
+          options: ['Mengunyah makanan', 'Menyerap air dan garam mineral', 'Menghasilkan asam lambung', 'Memotong makanan'],
+          answer: 1,
+          explanation: 'Usus besar menyerap kandungan air dan mineral dari sisa makanan serta membusukkan sisa feses.',
+          hint: 'Fokusnya adalah menyerap kadar cairan sisa ampas makanan.',
+          score: 100
+        }
+      ],
+
+      // MISI 3: Klinik Penyakit
+      mission3: [
+        {
+          id: 'M3_Q1',
+          mission: 3,
+          type: 'mcq',
+          question: 'PASIEN 1: "Andi sering mengalami buang air besar sangat keras dan jarang (sulit BAB). Kerasnya feses membuatnya kesakitan."',
+          options: ['Diare', 'Sembelit (Konstipasi)', 'Sariawan', 'Karies Gigi'],
+          answer: 1,
+          explanation: 'Sembelit/konstipasi disebabkan usus besar menyerap terlalu banyak air sehingga feses menjadi kering dan keras.',
+          hint: 'Gangguan kurang serat dan cairan yang menyebabkan feses keras.',
+          score: 100
+        },
+        {
+          id: 'M3_Q2',
+          mission: 3,
+          type: 'mcq',
+          question: 'PASIEN 2: "Siti mengalami buang air besar berkali-kali dalam sehari dengan feses yang sangat encer/cair."',
+          options: ['Diare', 'Sembelit', 'Gastritis / Maag', 'Apendisitis'],
+          answer: 0,
+          explanation: 'Diare ditandai BAB encer dan frekuensi tinggi, biasanya karena infeksi bakteri dari makanan kurang bersih.',
+          hint: 'Gangguan akibat penyerapan air di usus terganggu karena kuman.',
+          score: 100
+        },
+        {
+          id: 'M3_Q3',
+          mission: 3,
+          type: 'mcq',
+          question: 'PASIEN 3: "Roni merasakan nyeri dan perih di perut bagian atas (lambung) terutama saat terlambat makan."',
+          options: ['Karies Gigi', 'Diare', 'Gastritis (Maag)', 'Sariawan'],
+          answer: 2,
+          explanation: 'Gastritis atau maag adalah peradangan pada selaput lambung akibat asam lambung berlebih atau pola makan tidak teratur.',
+          hint: 'Penyakit lambung akibat makan tidak teratur.',
+          score: 100
+        },
+        {
+          id: 'M3_Q4',
+          mission: 3,
+          type: 'mcq',
+          question: 'PASIEN 4: "Budi memiliki benjolan luka kecil berwarna putih di bagian dalam bibir yang terasa perih saat makan makanan asin."',
+          options: ['Sariawan', 'Diare', 'Sembelit', 'Usus Buntu'],
+          answer: 0,
+          explanation: 'Sariawan adalah luka kecil peradangan di rongga mulut yang dapat disebabkan kurang vitamin C atau mulut tergigit.',
+          hint: 'Luka kecil di rongga mulut atau lidah.',
+          score: 100
+        },
+        {
+          id: 'M3_Q5',
+          mission: 3,
+          type: 'mcq',
+          question: 'PASIEN 5: "Gigi Ani berlubang dan sering terasa ngilu tajam saat minum es karena jarang menyikat gigi sebelum tidur."',
+          options: ['Sembelit', 'Karies Gigi', 'Maag', 'Apendisitis'],
+          answer: 1,
+          explanation: 'Karies gigi adalah kerusakan jaringan gigi yang membentuk lubang akibat asam dari kuman yang memakan sisa gula.',
+          hint: 'Penyakit gigi berlubang akibat sisa makanan.',
+          score: 100
+        },
+        {
+          id: 'M3_Q6',
+          mission: 3,
+          type: 'mcq',
+          question: 'PASIEN 6: "Deni merasakan sakit luar biasa di perut bagian kanan bawah. Dokter menduga terjadi peradangan pada umbai cacing."',
+          options: ['Apendisitis (Usus Buntu)', 'Sariawan', 'Sembelit', 'Karies Gigi'],
+          answer: 0,
+          explanation: 'Apendisitis atau radang usus buntu adalah pembengkakan pada organ apendiks di kanan bawah perut.',
+          hint: 'Peradangan pada apendiks atau usus buntu.',
+          score: 100
+        },
+        {
+          id: 'M3_Q7',
+          mission: 3,
+          type: 'mcq',
+          question: 'Manakah cara paling efektif untuk mencegah gangguan diare dan menjaga kebersihan pencernaan sebelum makan?',
+          options: ['Makan sambil berlari', 'Mencuci tangan memakai sabun dan air mengalir', 'Minum air mentah langsung dari sumur', 'Menahan buang air besar'],
+          answer: 1,
+          explanation: 'Mencuci tangan dengan sabun membunuh kuman penyebab diare sebelum menyentuh makanan.',
+          hint: 'Langkah higienis paling utama sebelum memegang makanan.',
+          score: 100
+        },
+        {
+          id: 'M3_Q8',
+          mission: 3,
+          type: 'mcq',
+          question: 'Agar terhindar dari penyakit sembelit (konstipasi), konsumsi makanan apakah yang sangat dianjurkan?',
+          options: ['Makanan tinggi minyak dan lemak', 'Sayur-sayuran, buah-buahan, dan air yang cukup', 'Gorengan pedas setiap hari', 'Permen dan es krim manis'],
+          answer: 1,
+          explanation: 'Serat dalam sayur dan buah melancarkan pencernaan di usus besar dan mencegah feses menjadi keras.',
+          hint: 'Makanan kaya serat alami pencerna.',
+          score: 100
+        }
+      ],
+
+      // MISI 4: Detektif Ketelitian
+      mission4: [
+        {
+          id: 'M4_Q1',
+          mission: 4,
+          type: 'true_false',
+          question: 'TANTANGAN KETELITIAN #1:\n"Usus halus merupakan tempat utama terjadinya penyerapan sebagian besar sari-sari makanan."',
+          options: ['BENAR', 'SALAH'],
+          answer: 0,
+          explanation: 'Pernyataan ini BENAR. Usus halus adalah lokasi utama penyerapan sari makanan.',
+          hint: 'Ingat kembali fungsi penyerapan zat gizi makanan.',
+          score: 100
+        },
+        {
+          id: 'M4_Q2',
+          mission: 4,
+          type: 'mcq',
+          question: 'TANTANGAN KETELITIAN #2: Bacalah 4 pernyataan berikut! Manakah pernyataan yang SALAH?',
+          options: [
+            'Lambung membantu meremas dan mencerna makanan secara mekanis dan kimiawi.',
+            'Usus halus menyerap sari-sari makanan.',
+            'Kerongkongan merupakan tempat utama penyerapan sari-sari makanan.',
+            'Usus besar menyerap air dari sisa makanan.'
+          ],
+          answer: 2,
+          explanation: 'Pernyataan C SALAH karena kerongkongan hanya menyalurkan makanan ke lambung, BUKAN tempat penyerapan sari makanan.',
+          hint: 'Cari organ yang fungsinya disebutkan tidak sesuai!',
+          score: 100
+        },
+        {
+          id: 'M4_Q3',
+          mission: 4,
+          type: 'mcq',
+          question: 'TANTANGAN KETELITIAN #3: Manakah pasangan pernyataan yang TEPAT mengenai Diare dan Sembelit?',
+          options: [
+            'Diare = Feses cair & BAB sering. Sembelit = Feses keras & BAB sulit.',
+            'Diare = Feses keras & BAB sulit. Sembelit = Feses cair & BAB sering.',
+            'Diare = Sakit pada gigi. Sembelit = Perih di lambung.',
+            'Diare = Penyerapan air berlebihan. Sembelit = Dinding mulut terluka.'
+          ],
+          answer: 0,
+          explanation: 'Diare ditandai feses cair dan BAB sering. Sembelit ditandai feses keras dan BAB sulit.',
+          hint: 'Baca perbedaan kata "cair" dan "keras" dengan sangat cermat!',
+          score: 100
+        },
+        {
+          id: 'M4_Q4',
+          mission: 4,
+          type: 'true_false',
+          question: 'TANTANGAN KETELITIAN #4:\n"Enzim ptyalin (amilase) ditemukan di dalam lambung untuk mencerna protein."',
+          options: ['BENAR', 'SALAH'],
+          answer: 1,
+          explanation: 'Pernyataan ini SALAH. Enzim ptyalin terdapat di air liur mulut untuk memecah zat tepung, bukan di lambung.',
+          hint: 'Perhatikan lokasi organ tempat ditemukannya enzim ptyalin!',
+          score: 100
+        },
+        {
+          id: 'M4_Q5',
+          mission: 4,
+          type: 'mcq',
+          question: 'TANTANGAN KETELITIAN #5: Cari label yang TUKAR TEMPAT / SALAH pada kalimat berikut!\n"Setelah dikunyah di mulut, makanan masuk ke lambung melalui saluran usus besar."',
+          options: [
+            'Kata "mulut" seharusnya "anus"',
+            'Kata "usus besar" seharusnya "kerongkongan"',
+            'Kata "lambung" seharusnya "gigi"',
+            'Kalimat tersebut sudah 100% tepat'
+          ],
+          answer: 1,
+          explanation: 'Saluran pencernaan dari mulut menuju lambung adalah kerongkongan, bukan usus besar.',
+          hint: 'Organ apa yang menghubungkan mulut ke lambung?',
+          score: 100
+        },
+        {
+          id: 'M4_Q6',
+          mission: 4,
+          type: 'true_false',
+          question: 'TANTANGAN KETELITIAN #6:\n"Pencernaan mekanis hanya terjadi di mulut dengan bantuan gigi, sedangkan di lambung tidak ada pencernaan mekanis."',
+          options: ['BENAR', 'SALAH'],
+          answer: 1,
+          explanation: 'Pernyataan ini SALAH. Di lambung juga terjadi pencernaan mekanis yaitu gerakan meremas dan mengaduk oleh otot dinding lambung.',
+          hint: 'Apakah dinding otot lambung mengaduk makanan?',
+          score: 100
+        },
+        {
+          id: 'M4_Q7',
+          mission: 4,
+          type: 'mcq',
+          question: 'TANTANGAN KETELITIAN #7: Urutan nama organ berikut yang memiliki TEPAT SATU KESALAHAN posisi adalah...',
+          options: [
+            'Mulut → Kerongkongan → Lambung → Usus Halus → Usus Besar → Anus',
+            'Mulut → Lambung → Kerongkongan → Usus Halus → Usus Besar → Anus',
+            'Mulut → Kerongkongan → Usus Halus → Lambung → Anus',
+            'Kerongkongan → Mulut → Lambung → Usus Besar'
+          ],
+          answer: 1,
+          explanation: 'Pilihan B memiliki kesalahan posisi karena Lambung tertukar sebelum Kerongkongan.',
+          hint: 'Temukan pilihan yang posisi Kerongkongan dan Lambung tertukar!',
+          score: 100
+        },
+        {
+          id: 'M4_Q8',
+          mission: 4,
+          type: 'true_false',
+          question: 'TANTANGAN KETELITIAN #8:\n"Meminum cukup air putih dan mencuci tangan sebelum makan adalah dua kebiasaan sederhana untuk menjaga organ pencernaan tetap sehat."',
+          options: ['BENAR', 'SALAH'],
+          answer: 0,
+          explanation: 'Pernyataan ini 100% BENAR dan merupakan saran kesehatan utama.',
+          hint: 'Perhatikan apakah kedua kebiasaan itu baik untuk tubuh.',
+          score: 100
+        }
+      ]
+    };
+
+    /* ==========================================================================
+       UI CONTROLLER & NAVIGATION
+       ========================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      runLoadingSequence();
+      loadLeaderboardFromStorage();
+    });
+
+    function runLoadingSequence() {
+      const bar = document.getElementById('loadingProgressBar');
+      const text = document.getElementById('loadingStatusText');
+
+      const steps = [
+        { percent: '25%', msg: 'Menyiapkan laboratorium...' },
+        { percent: '50%', msg: 'Menganalisis sistem pencernaan...' },
+        { percent: '75%', msg: 'Menyiapkan misi detektif...' },
+        { percent: '100%', msg: 'Membuka pintu laboratorium...' }
+      ];
+
+      let idx = 0;
+      const interval = setInterval(() => {
+        if (idx < steps.length) {
+          bar.style.width = steps[idx].percent;
+          text.textContent = steps[idx].msg;
+          idx++;
+        } else {
+          clearInterval(interval);
+          setTimeout(() => {
+            switchView('viewHome');
+          }, 400);
+        }
+      }, 500);
+    }
+
+    function switchView(viewId) {
+      playSynthSound('click');
+      const views = ['viewLoading', 'viewHome', 'viewInstructions', 'viewRegister', 'viewMissionMap', 'viewMissionRoom', 'viewMissionKeypad', 'viewResults', 'viewReview', 'viewLeaderboard', 'viewAbout'];
+
+      views.forEach(v => {
+        const el = document.getElementById(v);
+        if (el) el.classList.add('hidden');
+      });
+
+      const target = document.getElementById(viewId);
+      if (target) {
+        target.classList.remove('hidden');
+        gameState.currentView = viewId;
+      }
+
+      const headerStats = document.getElementById('headerGameStats');
+      if (['viewMissionMap', 'viewMissionRoom', 'viewMissionKeypad', 'viewResults'].includes(viewId)) {
+        headerStats.classList.remove('hidden');
+      } else {
+        headerStats.classList.add('hidden');
+      }
+
+      updateHeaderStatsUI();
+    }
+
+    function updateHeaderStatsUI() {
+      document.getElementById('statScoreHeader').textContent = gameState.score;
+      document.getElementById('displayPlayerInfo').textContent = `${gameState.player.name || '-'} (${gameState.player.class || '-'})`;
+    }
+
+    function handleRegistration(e) {
+      e.preventDefault();
+      const name = document.getElementById('inputPlayerName').value.trim();
+      const cls = document.getElementById('selectPlayerClass').value;
+
+      if (!name || !cls) {
+        showToast('Mohon isi nama dan pilih kelas terlebih dahulu!', 'warning');
+        return;
+      }
+
+      gameState.player.name = name;
+      gameState.player.class = cls;
+
+      // Reset Game Variables
+      gameState.score = 0;
+      gameState.timerSeconds = 0;
+      gameState.unlockedMissions = [1];
+      gameState.userAnswers = {};
+      gameState.mission4ErrorsCount = 0;
+      gameState.missionProgress = { 1: false, 2: false, 3: false, 4: false, 5: false };
+
+      startTimer();
+      showToast(`Selamat datang Detektif ${name}!`, 'success');
+      playSynthSound('unlock');
+
+      updateMissionMapUI();
+      switchView('viewMissionMap');
+    }
+
+    function startTimer() {
+      if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+      gameState.timerInterval = setInterval(() => {
+        gameState.timerSeconds++;
+        const mins = String(Math.floor(gameState.timerSeconds / 60)).padStart(2, '0');
+        const secs = String(gameState.timerSeconds % 60).padStart(2, '0');
+        document.getElementById('statTimerHeader').textContent = `${mins}:${secs}`;
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (gameState.timerInterval) {
+        clearInterval(gameState.timerInterval);
+        gameState.timerInterval = null;
+      }
+    }
+
+    function updateMissionMapUI() {
+      const unlockedCount = gameState.unlockedMissions.length;
+      document.getElementById('missionProgressBadge').textContent = `${unlockedCount} / 5 Terbuka`;
+
+      for (let i = 1; i <= 5; i++) {
+        const card = document.getElementById(`cardMission${i}`);
+        const icon = document.getElementById(`iconStatus${i}`);
+        const codeBadge = document.getElementById(`codeBadge${i}`);
+
+        if (gameState.unlockedMissions.includes(i)) {
+          card.className = "cursor-pointer bg-slate-800/90 hover:bg-slate-800 border-2 border-teal-500/80 rounded-2xl p-4 flex flex-col justify-between transition hover:-translate-y-1 shadow-lg";
+
+          if (gameState.missionProgress[i]) {
+            icon.className = "fa-solid fa-circle-check text-emerald-400";
+            if (codeBadge) {
+              codeBadge.textContent = gameState.missionCodes[i] || '✓';
+              codeBadge.className = "text-amber-400 font-extrabold";
+            }
+          } else {
+            icon.className = "fa-solid fa-unlock text-teal-400";
+          }
+        } else {
+          card.className = "cursor-not-allowed bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between opacity-50 transition";
+          icon.className = "fa-solid fa-lock text-slate-600";
+        }
+      }
+    }
+
+    function startMission(mNum) {
+      if (!gameState.unlockedMissions.includes(mNum)) {
+        showToast('Selesaikan misi sebelumnya terlebih dahulu!', 'warning');
+        playSynthSound('wrong');
+        return;
+      }
+
+      gameState.currentMission = mNum;
+      gameState.currentQuestionIndex = 0;
+
+      if (mNum === 5) {
+        openKeypadRoom();
+        return;
+      }
+
+      const key = `mission${mNum}`;
+      gameState.activeMissionQuestions = QUESTION_BANK[key] || [];
+
+      renderCurrentQuestion();
+      switchView('viewMissionRoom');
+    }
+
+    function renderCurrentQuestion() {
+      const q = gameState.activeMissionQuestions[gameState.currentQuestionIndex];
+      const totalQ = gameState.activeMissionQuestions.length;
+
+      document.getElementById('missionRoomBadge').textContent = `M${q.mission}`;
+      document.getElementById('missionRoomTitle').textContent = getMissionTitle(q.mission);
+      document.getElementById('missionRoomSubtitle').textContent = `Tantangan ${gameState.currentQuestionIndex + 1} dari ${totalQ}`;
+
+      const feedback = document.getElementById('feedbackContainer');
+      feedback.classList.add('hidden');
+      document.getElementById('btnNextQuestion').classList.add('hidden');
+
+      const qArea = document.getElementById('questionContentArea');
+      const aArea = document.getElementById('answerOptionsArea');
+      qArea.innerHTML = '';
+      aArea.innerHTML = '';
+
+      if (q.mission === 2) {
+        qArea.appendChild(createDigestiveSVGComponent());
+      }
+
+      const qCard = document.createElement('div');
+      qCard.className = 'bg-slate-900/90 p-5 rounded-2xl border border-slate-800 mb-4';
+      qCard.innerHTML = `<h3 class="text-base md:text-lg font-bold text-white whitespace-pre-line leading-relaxed">${q.question}</h3>`;
+      qArea.appendChild(qCard);
+
+      if (q.type === 'sequence') {
+        renderSequenceTypeQuestion(q, aArea);
+      } else {
+        renderMCQTypeQuestion(q, aArea);
+      }
+    }
+
+    function getMissionTitle(mNum) {
+      const titles = {
+        1: 'Jalur Perjalanan Makanan',
+        2: 'Laboratorium Organ Pencernaan',
+        3: 'Klinik Penyakit & Gangguan',
+        4: 'Detektif Ketelitian',
+        5: 'Kode Rahasia Kunci'
+      };
+      return titles[mNum] || 'Ruang Misi';
+    }
+
+    function createDigestiveSVGComponent() {
+      const container = document.createElement('div');
+      container.className = 'mb-4 bg-slate-950/80 p-4 rounded-2xl border border-slate-800 flex justify-center items-center';
+      container.innerHTML = `
+        <svg viewBox="0 0 400 320" class="w-full max-w-sm h-48 md:h-56">
+          <defs>
+            <linearGradient id="gradOrgan" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#14b8a6"/>
+              <stop offset="100%" stop-color="#06b6d4"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Head/Mouth -->
+          <circle cx="200" cy="35" r="22" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+          <path d="M 190 40 Q 200 48 210 40" fill="none" stroke="#2dd4bf" stroke-width="3"/>
+          <text x="230" y="40" fill="#2dd4bf" font-size="11" font-weight="bold">1. Mulut</text>
+
+          <!-- Esophagus (Kerongkongan) -->
+          <line x1="200" y1="57" x2="200" y2="110" stroke="#0ea5e9" stroke-width="6" stroke-linecap="round"/>
+          <text x="230" y="85" fill="#0ea5e9" font-size="11" font-weight="bold">2. Kerongkongan</text>
+
+          <!-- Stomach (Lambung) -->
+          <path d="M 185 110 Q 170 120 180 145 Q 210 160 215 130 Z" fill="#f59e0b" opacity="0.9"/>
+          <text x="105" y="130" fill="#f59e0b" font-size="11" font-weight="bold">3. Lambung</text>
+
+          <!-- Small Intestine (Usus Halus) -->
+          <path d="M 190 160 Q 210 170 190 180 Q 210 190 190 200" fill="none" stroke="#38bdf8" stroke-width="7" stroke-linecap="round"/>
+          <text x="230" y="180" fill="#38bdf8" font-size="11" font-weight="bold">4. Usus Halus</text>
+
+          <!-- Large Intestine (Usus Besar) -->
+          <path d="M 170 210 C 170 165 230 165 230 210" fill="none" stroke="#10b981" stroke-width="10" stroke-linecap="round"/>
+          <text x="80" y="200" fill="#10b981" font-size="11" font-weight="bold">5. Usus Besar</text>
+
+          <!-- Anus -->
+          <circle cx="200" cy="245" r="6" fill="#f43f5e"/>
+          <text x="230" y="250" fill="#f43f5e" font-size="11" font-weight="bold">6. Anus</text>
+        </svg>
+      `;
+      return container;
+    }
+
+    let currentSeqChoice = [];
+    function renderSequenceTypeQuestion(q, container) {
+      currentSeqChoice = [];
+
+      const seqBox = document.createElement('div');
+      seqBox.className = 'space-y-4';
+
+      const userSeqDisplay = document.createElement('div');
+      userSeqDisplay.id = 'seqDisplayBox';
+      userSeqDisplay.className = 'bg-slate-950 p-4 rounded-2xl border border-teal-500/40 min-h-[60px] flex flex-wrap gap-2 items-center';
+      userSeqDisplay.innerHTML = `<span class="text-xs text-slate-500 italic">Klik item pilihan di bawah untuk menyusun urutan...</span>`;
+
+      const poolBox = document.createElement('div');
+      poolBox.id = 'seqPoolBox';
+      poolBox.className = 'flex flex-wrap gap-2 pt-2';
+
+      q.pool.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold rounded-xl text-xs transition';
+        btn.textContent = item;
+        btn.onclick = () => {
+          if (!currentSeqChoice.includes(item)) {
+            currentSeqChoice.push(item);
+            btn.classList.add('opacity-40', 'pointer-events-none');
+            updateSeqDisplayUI(q, seqBox);
+          }
+        };
+        poolBox.appendChild(btn);
+      });
+
+      const submitBtn = document.createElement('button');
+      submitBtn.className = 'glow-btn w-full mt-4 py-3 bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold rounded-xl text-xs tracking-wider transition uppercase';
+      submitBtn.textContent = 'CEK URUTAN DETEKTIF';
+      submitBtn.onclick = () => checkSequenceAnswer(q);
+
+      seqBox.appendChild(userSeqDisplay);
+      seqBox.appendChild(poolBox);
+      seqBox.appendChild(submitBtn);
+      container.appendChild(seqBox);
+    }
+
+    function updateSeqDisplayUI(q, seqBox) {
+      const display = document.getElementById('seqDisplayBox');
+      display.innerHTML = '';
+
+      if (currentSeqChoice.length === 0) {
+        display.innerHTML = `<span class="text-xs text-slate-500 italic">Klik item pilihan di bawah untuk menyusun urutan...</span>`;
+        return;
+      }
+
+      currentSeqChoice.forEach((item, idx) => {
+        const badge = document.createElement('span');
+        badge.className = 'px-3 py-1.5 bg-teal-500/20 text-teal-300 border border-teal-500/40 rounded-lg text-xs font-bold flex items-center space-x-1';
+        badge.innerHTML = `<span>${idx + 1}. ${item}</span>`;
+
+        const removeBtn = document.createElement('i');
+        removeBtn.className = 'fa-solid fa-xmark ml-1.5 cursor-pointer text-rose-400 hover:text-rose-300';
+        removeBtn.onclick = (e) => {
+          e.stopPropagation();
+          currentSeqChoice.splice(idx, 1);
+
+          const poolBtns = document.getElementById('seqPoolBox').querySelectorAll('button');
+          poolBtns.forEach(b => {
+            if (b.textContent === item) b.classList.remove('opacity-40', 'pointer-events-none');
+          });
+
+          updateSeqDisplayUI(q, seqBox);
+        };
+
+        badge.appendChild(removeBtn);
+        display.appendChild(badge);
+      });
+    }
+
+    function checkSequenceAnswer(q) {
+      if (currentSeqChoice.length !== q.correctSequence.length) {
+        showToast('Pilih seluruh organ terlebih dahulu!', 'warning');
+        return;
+      }
+
+      const isCorrect = JSON.stringify(currentSeqChoice) === JSON.stringify(q.correctSequence);
+      processAnswerFeedback(q, isCorrect, currentSeqChoice.join(' → '));
+    }
+
+    function renderMCQTypeQuestion(q, container) {
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'w-full text-left p-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-teal-500/60 rounded-2xl text-slate-200 font-medium text-xs md:text-sm transition flex items-center justify-between group';
+        btn.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <span class="w-7 h-7 rounded-lg bg-slate-700 group-hover:bg-teal-500 group-hover:text-slate-950 font-bold flex items-center justify-center text-xs text-slate-300 transition">
+              ${String.fromCharCode(65 + idx)}
+            </span>
+            <span>${opt}</span>
+          </div>
+          <i class="fa-solid fa-chevron-right text-slate-600 group-hover:text-teal-400 text-xs transition"></i>
+        `;
+        btn.onclick = () => {
+          const isCorrect = idx === q.answer;
+          processAnswerFeedback(q, isCorrect, opt);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function processAnswerFeedback(q, isCorrect, givenText) {
+      let earned = 0;
+      if (isCorrect) {
+        earned = q.score || 100;
+        gameState.score += earned;
+        playSynthSound('correct');
+      } else {
+        playSynthSound('wrong');
+        if (q.mission === 4) gameState.mission4ErrorsCount++;
+      }
+
+      gameState.userAnswers[q.id] = {
+        question: q.question,
+        givenAnswer: givenText,
+        correctAnswer: q.correctSequence ? q.correctSequence.join(' → ') : q.options[q.answer],
+        isCorrect: isCorrect,
+        explanation: q.explanation,
+        mission: q.mission
+      };
+
+      const feedback = document.getElementById('feedbackContainer');
+      const icon = document.getElementById('feedbackIcon');
+      const title = document.getElementById('feedbackTitle');
+      const text = document.getElementById('feedbackText');
+      const tipText = document.getElementById('feedbackTipText');
+
+      feedback.classList.remove('hidden');
+
+      if (isCorrect) {
+        feedback.className = 'p-4 rounded-2xl mb-6 border text-sm transition-all bg-emerald-950/60 border-emerald-500/40';
+        icon.className = 'fa-solid fa-circle-check text-emerald-400 text-2xl';
+        title.className = 'font-bold text-base mb-1 text-emerald-300';
+        title.textContent = '✅ JAWABAN BENAR! (+100 Poin)';
+      } else {
+        feedback.className = 'p-4 rounded-2xl mb-6 border text-sm transition-all bg-rose-950/60 border-rose-500/40';
+        icon.className = 'fa-solid fa-circle-xmark text-rose-400 text-2xl';
+        title.className = 'font-bold text-base mb-1 text-rose-300';
+        title.textContent = '❌ BELUM TEPAT!';
+      }
+
+      text.textContent = q.explanation;
+      tipText.textContent = q.hint;
+
+      document.getElementById('answerOptionsArea').classList.add('pointer-events-none', 'opacity-60');
+      document.getElementById('btnNextQuestion').classList.remove('hidden');
+      updateHeaderStatsUI();
+    }
+
+    function handleNextQuestion() {
+      document.getElementById('answerOptionsArea').classList.remove('pointer-events-none', 'opacity-60');
+
+      if (gameState.currentQuestionIndex < gameState.activeMissionQuestions.length - 1) {
+        gameState.currentQuestionIndex++;
+        renderCurrentQuestion();
+      } else {
+        finishCurrentMission();
+      }
+    }
+
+    function finishCurrentMission() {
+      const mNum = gameState.currentMission;
+      gameState.missionProgress[mNum] = true;
+      gameState.score += 200;
+
+      if (mNum < 5 && !gameState.unlockedMissions.includes(mNum + 1)) {
+        gameState.unlockedMissions.push(mNum + 1);
+      }
+
+      if (mNum === 4 && gameState.mission4ErrorsCount === 0) {
+        gameState.score += 100;
+        showToast('⭐ BONUS KETELITIAN DITERIMA (+100 Pts)!', 'success');
+      }
+
+      playSynthSound('unlock');
+      const codeEarned = gameState.missionCodes[mNum];
+      showModal(
+        '🎉 MISI SELESAI!',
+        `Kamu berhasil menyelesaikan Misi ${mNum} dan mendapatkan Kode Rahasia: <strong class="text-amber-400 text-2xl font-mono">${codeEarned}</strong>. Poin bonus +200 berhasil ditambahkan!`,
+        () => {
+          updateMissionMapUI();
+          switchView('viewMissionMap');
+        }
+      );
+    }
+
+    function requestHint() {
+      const q = gameState.activeMissionQuestions[gameState.currentQuestionIndex];
+      if (!q) return;
+
+      if (gameState.score >= 25) {
+        gameState.score -= 25;
+        showToast(`💡 PETUNJUK DETEKTIF: ${q.hint}`, 'info');
+        updateHeaderStatsUI();
+      } else {
+        showToast('Poin kamu tidak cukup untuk membuka petunjuk (-25 pt)!', 'warning');
+      }
+    }
+
+    /* ==========================================================================
+       KEYPAD SECURITY ROOM (MISSION 5)
+       ========================================================================== */
+    function openKeypadRoom() {
+      document.getElementById('summaryCode1').textContent = gameState.missionCodes[1];
+      document.getElementById('summaryCode2').textContent = gameState.missionCodes[2];
+      document.getElementById('summaryCode3').textContent = gameState.missionCodes[3];
+      document.getElementById('summaryCode4').textContent = gameState.missionCodes[4];
+
+      clearKeypad();
+      switchView('viewMissionKeypad');
+    }
+
+    function pressKeypad(num) {
+      if (gameState.keypadInput.length < 4) {
+        playSynthSound('click');
+        gameState.keypadInput += num;
+        updateKeypadDisplay();
+      }
+    }
+
+    function clearKeypad() {
+      playSynthSound('click');
+      gameState.keypadInput = '';
+      updateKeypadDisplay();
+    }
+
+    function updateKeypadDisplay() {
+      const padded = gameState.keypadInput.padEnd(4, '_');
+      document.getElementById('keypadDisplay').textContent = padded.split('').join(' ');
+    }
+
+    function submitKeypad() {
+      const targetCode = `${gameState.missionCodes[1]}${gameState.missionCodes[2]}${gameState.missionCodes[3]}${gameState.missionCodes[4]}`;
+
+      if (gameState.keypadInput === targetCode) {
+        playSynthSound('win');
+        gameState.score += 300;
+        stopTimer();
+
+        saveToLeaderboard();
+        renderResultsPage();
+        switchView('viewResults');
+      } else {
+        playSynthSound('wrong');
+        showToast('🔒 KODE BELUM TEPAT! Periksa kembali angka petunjuk.', 'danger');
+        clearKeypad();
+      }
+    }
+
+    /* ==========================================================================
+       RESULTS & REVIEW ENGINE
+       ========================================================================== */
+    function renderResultsPage() {
+      document.getElementById('resultPlayerName').textContent = gameState.player.name;
+      document.getElementById('resultPlayerClass').textContent = gameState.player.class;
+      document.getElementById('resultTotalScore').textContent = gameState.score;
+
+      const totalAttempted = Object.keys(gameState.userAnswers).length;
+      let correctCount = 0;
+      Object.values(gameState.userAnswers).forEach(ans => {
+        if (ans.isCorrect) correctCount++;
+      });
+
+      const accuracyPct = totalAttempted > 0 ? Math.round((correctCount / totalAttempted) * 100) : 0;
+      document.getElementById('resultAccuracy').textContent = `${accuracyPct}%`;
+      document.getElementById('resultCorrectWrong').textContent = `${correctCount} / ${totalAttempted - correctCount}`;
+
+      const mins = String(Math.floor(gameState.timerSeconds / 60)).padStart(2, '0');
+      const secs = String(gameState.timerSeconds % 60).padStart(2, '0');
+      document.getElementById('resultTime').textContent = `${mins}:${secs}`;
+
+      const badge = document.getElementById('resultPredicateBadge');
+      if (accuracyPct >= 90) {
+        badge.textContent = '🏆 DETEKTIF SUPER TELITI';
+      } else if (accuracyPct >= 80) {
+        badge.textContent = '⭐ DETEKTIF HEBAT';
+      } else if (accuracyPct >= 70) {
+        badge.textContent = '👍 DETEKTIF BAIK';
+      } else {
+        badge.textContent = '💪 TERUS BERLATIH';
+      }
+
+      renderReviewList();
+    }
+
+    function renderReviewList() {
+      const container = document.getElementById('reviewQuestionsList');
+      container.innerHTML = '';
+
+      const keys = Object.keys(gameState.userAnswers);
+      if (keys.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400">Belum ada soal yang dikerjakan.</p>`;
+        return;
+      }
+
+      keys.forEach((k, idx) => {
+        const item = gameState.userAnswers[k];
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-2xl border text-xs leading-relaxed ${item.isCorrect ? 'bg-slate-900/80 border-emerald-500/40' : 'bg-slate-900/80 border-rose-500/40'}`;
+
+        card.innerHTML = `
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-bold text-white">Soal #${idx + 1} (Misi ${item.mission})</span>
+            <span class="font-bold px-2 py-0.5 rounded text-[10px] ${item.isCorrect ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">
+              ${item.isCorrect ? '🟢 Benar' : '🔴 Salah'}
+            </span>
+          </div>
+          <p class="text-slate-200 font-semibold mb-2">${item.question}</p>
+          <div class="space-y-1 mb-2">
+            <p class="text-slate-400">Jawabanmu: <strong class="${item.isCorrect ? 'text-emerald-400' : 'text-rose-400'}">${item.givenAnswer}</strong></p>
+            ${!item.isCorrect ? `<p class="text-slate-400">Jawaban Benar: <strong class="text-teal-400">${item.correctAnswer}</strong></p>` : ''}
+          </div>
+          <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-slate-300">
+            <strong class="text-cyan-400">Pembahasan:</strong> ${item.explanation}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    /* ==========================================================================
+       LOCALSTORAGE LEADERBOARD
+       ========================================================================== */
+    function saveToLeaderboard() {
+      const totalAttempted = Object.keys(gameState.userAnswers).length;
+      let correctCount = 0;
+      Object.values(gameState.userAnswers).forEach(ans => {
+        if (ans.isCorrect) correctCount++;
+      });
+      const accuracyPct = totalAttempted > 0 ? Math.round((correctCount / totalAttempted) * 100) : 0;
+
+      const mins = String(Math.floor(gameState.timerSeconds / 60)).padStart(2, '0');
+      const secs = String(gameState.timerSeconds % 60).padStart(2, '0');
+
+      const newEntry = {
+        name: gameState.player.name,
+        class: gameState.player.class,
+        score: gameState.score,
+        accuracy: `${accuracyPct}%`,
+        time: `${mins}:${secs}`,
+        date: new Date().toLocaleDateString('id-ID')
+      };
+
+      let list = [];
+      try {
+        const stored = localStorage.getItem('misteri_pencernaan_leaderboard');
+        if (stored) list = JSON.parse(stored);
+      } catch (e) { list = []; }
+
+      list.push(newEntry);
+      list.sort((a, b) => b.score - a.score);
+      list = list.slice(0, 10);
+
+      try {
+        localStorage.setItem('misteri_pencernaan_leaderboard', JSON.stringify(list));
+      } catch (e) {}
+
+      refreshLeaderboardUI();
+    }
+
+    function loadLeaderboardFromStorage() {
+      refreshLeaderboardUI();
+    }
+
+    function refreshLeaderboardUI() {
+      const tbody = document.getElementById('leaderboardTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      let list = [];
+      try {
+        const stored = localStorage.getItem('misteri_pencernaan_leaderboard');
+        if (stored) list = JSON.parse(stored);
+      } catch (e) { list = []; }
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-500 italic">Belum ada rekor papan skor.</td></tr>`;
+        return;
+      }
+
+      list.forEach((entry, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition';
+
+        let medal = `${idx + 1}`;
+        if (idx === 0) medal = '🥇';
+        else if (idx === 1) medal = '🥈';
+        else if (idx === 2) medal = '🥉';
+
+        tr.innerHTML = `
+          <td class="py-3 pl-2 font-bold text-amber-400">${medal}</td>
+          <td class="py-3 font-semibold text-white">${entry.name}</td>
+          <td class="py-3 text-slate-400">${entry.class}</td>
+          <td class="py-3 font-extrabold text-teal-400">${entry.score}</td>
+          <td class="py-3 text-cyan-400">${entry.accuracy}</td>
+          <td class="py-3 pr-2 text-slate-300">${entry.time}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* ==========================================================================
+       TOAST & MODAL UTILITIES
+       ========================================================================== */
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+
+      let bgClass = 'bg-slate-800 border-slate-700 text-white';
+      if (type === 'success') bgClass = 'bg-emerald-900/90 border-emerald-500 text-emerald-200';
+      if (type === 'warning') bgClass = 'bg-amber-900/90 border-amber-500 text-amber-200';
+      if (type === 'danger') bgClass = 'bg-rose-900/90 border-rose-500 text-rose-200';
+
+      toast.className = `p-3.5 rounded-xl border shadow-xl text-xs font-semibold flex items-center space-x-2 backdrop-blur transition-all duration-300 transform translate-x-10 opacity-0 ${bgClass}`;
+      toast.innerHTML = `<span>${msg}</span>`;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.remove('translate-x-10', 'opacity-0');
+      }, 50);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-x-10');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function showModal(title, bodyText, onConfirm) {
+      const modal = document.getElementById('customModal');
+      const content = document.getElementById('modalContent');
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalBody').innerHTML = bodyText;
+
+      const confirmBtn = document.getElementById('btnModalConfirm');
+      confirmBtn.onclick = () => {
+        hideModal();
+        if (onConfirm) onConfirm();
+      };
+
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function hideModal() {
+      const modal = document.getElementById('customModal');
+      const content = document.getElementById('modalContent');
+
+      content.classList.remove('scale-100', 'opacity-100');
+      content.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 200);
+    }
+
+    function confirmReturnHome() {
+      if (gameState.currentView === 'viewHome') return;
+      showModal(
+        'Kembali ke Beranda?',
+        'Kemajuan permainan saat ini akan dihentikan. Apakah kamu yakin?',
+        () => {
+          stopTimer();
+          switchView('viewHome');
+        }
+      );
+    }
+
+    function restartGame() {
+      stopTimer();
+      gameState.score = 0;
+      gameState.timerSeconds = 0;
+      gameState.unlockedMissions = [1];
+      gameState.userAnswers = {};
+      gameState.missionProgress = { 1: false, 2: false, 3: false, 4: false, 5: false };
+      switchView('viewRegister');
+    }
+  </script>
+</body>
+</html>
